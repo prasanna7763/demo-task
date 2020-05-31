@@ -28,11 +28,15 @@ steps:
   inputs:
     PathtoPublish: '$(build.artifactstagingdirectory)'
   condition: succeededOrFailed()
-
+- task: Docker@2
+  displayName: login
+  inputs:
+    containerRegistry: 'mydockerconnection'
+    command: login
 - task: Docker@2
   displayName: buildAndPush
   inputs:
-    containerRegistry: 'kavya-docker-registry'
+    containerRegistry: 'mydockerconnection'
     repository: 'kavyareddy0911/demo-project-Maven-CI'
     Dockerfile: Dockerfile
     tags: 'v_$(Build.BuildId)'
