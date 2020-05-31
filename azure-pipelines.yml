@@ -27,11 +27,11 @@ steps:
 - task: Docker@2
   inputs:
     command: 'login'
-    containerRegistry: mydockerconnection
+    containerRegistry: '$(mydockerconnection)'
 - task: Docker@2
   displayName: buildAndPush
   inputs:
-    containerRegistry: mydockerconnection
+    containerRegistry: '$(mydockerconnection)'
     repository: 'kavyareddy0911/demo-project-Maven-CI'
     Dockerfile: Dockerfile
     tags: 'v_$(Build.BuildId)'
