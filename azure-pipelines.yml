@@ -1,37 +1,51 @@
-pool:
-  name: Azure Pipelines
-  demands: maven
+# Docker
+# Build a Docker image 
+# https://docs.microsoft.com/azure/devops/pipelines/languages/docker
 
-#Your build pipeline references an undefined variable named ‘Parameters.mavenPOMFile’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
+trigger:
+- master
 
-steps:
-- task: Maven@3
-  displayName: 'Maven pom.xml'
-  inputs:
-    mavenPomFile: '$(Parameters.mavenPOMFile)'
+resources:
+- repo: self
 
-- task: CopyFiles@2
-  displayName: 'Copy Files to: $(build.artifactstagingdirectory)'
-  inputs:
-    SourceFolder: 'kuberenetes-demo-manifests-master/kuberenetes-demo-manifests-master'
-    Contents: 'backend-deployment.yaml'
-    TargetFolder: '$(build.artifactstagingdirectory)'
-  condition: succeededOrFailed()
+variables:
+  tag: 'v_$(Build.BuildId)'
 
-- task: PublishBuildArtifacts@1
-  displayName: 'Publish Artifact: drop'
-  inputs:
-    PathtoPublish: '$(build.artifactstagingdirectory)'
-  condition: succeededOrFailed()
-
-- task: Docker@2
-  inputs:
-    command: 'login'
-    containerRegistry: '$(mydockerconnection)'
-- task: Docker@2
-  displayName: buildAndPush
-  inputs:
-    containerRegistry: '$(mydockerconnection)'
-    repository: 'kavyareddy0911/demo-project-Maven-CI'
-    Dockerfile: Dockerfile
-    tags: 'v_$(Build.BuildId)'
+stages:
+- stage: Build
+  displayName: Build image
+  jobs:  
+  - job: Build
+    displayName: Build
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - task: Maven@3
+      inputs:
+        mavenPomFile: 'pom.xml'
+        publishJUnitResults: true
+        testResultsFiles: '**/surefire-reports/TEST-*.xml'
+        javaHomeOption: 'JDKVersion'
+        mavenVersionOption: 'Default'
+        mavenAuthenticateFeed: false
+        effectivePomSkip: false
+        sonarQubeRunAnalysis: false
+    - task: CopyFiles@2
+      displayName: 'Copy Files to: $(build.artifactstagingdirectory)'
+      inputs:
+        SourceFolder: 'kuberenetes-demo-manifests-master/kuberenetes-demo-manifests-master'
+        Contents: 'backend-deployment.yaml'
+        TargetFolder: '$(build.artifactstagingdirectory)'
+      condition: succeededOrFailed()
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish Artifact: drop'
+      inputs:
+        PathtoPublish: '$(build.artifactstagingdirectory)'
+      condition: succeededOrFailed()
+    - task: Docker@2
+      displayName: buildAndPush
+      inputs:
+        containerRegistry: 'mydockerconnection'
+        repository: 'kavyareddy0911/demo-project'
+        Dockerfile: Dockerfile
+        tags: 'v_$(Build.BuildId)'
