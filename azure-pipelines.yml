@@ -45,6 +45,10 @@ stages:
     - task: Docker@2
       displayName: buildAndPush
       inputs:
+        Connection Name: 'mydockerconnection'
+        Docker Registry: 'https://index.docker.io/v1/'
+        Docker ID: 'kavyareddy0911'
+        Password: 'Ksra@0911'
         containerRegistry: 'mydockerconnection'
         repository: 'kavyareddy0911/cicd-github'
         Dockerfile: Dockerfile
