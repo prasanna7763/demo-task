@@ -61,6 +61,6 @@ stages:
       displayName: buildAndPush
       inputs:
         containerRegistry: 'dockerconnection'
-        repository: 'kavyareddy0911/demo-project-backend'
+        repository: 'kavyareddytalla0911/demo-project-backend'
         Dockerfile: Dockerfile
         tags: 'v_$(Build.BuildId)'
