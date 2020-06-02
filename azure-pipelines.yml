@@ -1,4 +1,4 @@
-# Docker
+ Docker
 # Build a Docker image 
 # https://docs.microsoft.com/azure/devops/pipelines/languages/docker
 
@@ -37,6 +37,13 @@ stages:
         Contents: 'backend-deployment.yaml'
         TargetFolder: '$(build.artifactstagingdirectory)'
       condition: succeededOrFailed()
+    - task: CopyFiles@2
+      displayName: 'Copy Files to: $(build.artifactstagingdirectory)'
+      inputs:
+        SourceFolder: 'kuberenetes-demo-manifests-master/kuberenetes-demo-manifests-master/'
+        Contents: 'frontend-deployment.yaml'
+        TargetFolder: '$(build.artifactstagingdirectory)'
+
     - task: PublishBuildArtifacts@1
       displayName: 'Publish Artifact: drop'
       inputs:
@@ -45,7 +52,15 @@ stages:
     - task: Docker@2
       displayName: buildAndPush
       inputs:
-        containerRegistry: 'myconnection-new'
-        repository: 'kavyareddy0911/demo-project'
+        containerRegistry: 'dockerconnection'
+        repository: 'kavyareddytalla0911/demo-project-frontend'
+        Dockerfile: 'kubernetes-demo-frontend-master/Dockerfile'
+        tags: 'v_$(Build.BuildId)'
+
+    - task: Docker@2
+      displayName: buildAndPush
+      inputs:
+        containerRegistry: 'dockerconnection'
+        repository: 'kavyareddytalla0911/demo-project-backend'
         Dockerfile: Dockerfile
         tags: 'v_$(Build.BuildId)'
